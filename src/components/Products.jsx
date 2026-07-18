@@ -29,9 +29,9 @@ const products = [
   },
   {
     id: 4,
-    nameUZ: "Quritilgan meva",
-    nameRU: "Сухофрукты",
-    nameEN: "Dried Fruits",
+    nameUZ: "Kungaboqar urug'i",
+    nameRU: "Семена подсолнечника",
+    nameEN: "Sunflower Seeds",
     img: p4,
   },
   {
