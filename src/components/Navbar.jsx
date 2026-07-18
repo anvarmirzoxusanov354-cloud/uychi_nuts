@@ -1,29 +1,60 @@
-import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { useLang } from "../LangContext";
-import logo from "../assets/logo.png";
+import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
+import { useLang } from '../LangContext';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const { lang, setLang, t } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
 
   const navLinks = [
-    { label: t.nav_home, href: "#hero" },
-    { label: t.nav_about, href: "#about" },
-    { label: t.nav_products, href: "#products" },
-    { label: t.nav_contact, href: "#contact" },
+    { label: t.nav_home,     href: '#hero'     },
+    { label: t.nav_about,    href: '#about'    },
+    { label: t.nav_products, href: '#products' },
+    { label: t.nav_contact,  href: '#contact'  },
   ];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const sections = ['hero', 'about', 'products', 'contact'];
+    const observers = [];
+
+    const titles = {
+      hero:     'Uychi Nuts — Bosh Sahifa',
+      about:    'Uychi Nuts — Biz Haqimizda',
+      products: 'Uychi Nuts — Mahsulotlar',
+      contact:  'Uychi Nuts — Aloqa',
+    };
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setActiveSection(id);
+            document.title = titles[id];
+          }
+        },
+        { threshold: 0.3 }
+      );
+      observer.observe(el);
+      observers.push(observer);
+    });
+
+    return () => observers.forEach((o) => o.disconnect());
   }, []);
 
   const scrollTo = (href) => {
-    const el = document.getElementById(href.replace("#", ""));
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(href.replace('#', ''));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMenuOpen(false);
   };
 
@@ -57,19 +88,24 @@ export default function Navbar() {
           {/* Nav links + lang */}
           <div className="hidden md:flex items-center gap-8">
             <nav className="flex items-center gap-6">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollTo(link.href);
-                  }}
-                  className="text-sm font-semibold text-white/80 hover:text-white transition-colors duration-200"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const id = link.href.replace('#', '');
+                const isActive = activeSection === id;
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => { e.preventDefault(); scrollTo(link.href); }}
+                    className={`text-sm font-semibold transition-colors duration-200 relative pb-0.5
+                      ${isActive
+                        ? 'text-white after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white after:rounded-full'
+                        : 'text-white/60 hover:text-white'
+                      }`}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
             </nav>
 
             {/* Language Switcher */}
@@ -115,19 +151,21 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-[#1e3a2f] border-t border-white/10 px-6 py-4 space-y-3 shadow-lg">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={(e) => {
-                e.preventDefault();
-                scrollTo(link.href);
-              }}
-              className="block text-sm font-bold text-white/80 hover:text-white py-1"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const id = link.href.replace('#', '');
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => { e.preventDefault(); scrollTo(link.href); }}
+                className={`block text-sm font-bold py-1 transition-colors
+                  ${isActive ? 'text-white border-l-2 border-white pl-2' : 'text-white/60 hover:text-white'}`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
           <div className="pt-2 border-t border-white/10 flex flex-col gap-3">
             <div className="flex gap-3 text-xs font-bold text-white/60">
               {["UZ", "RU", "EN"].map((l) => (
